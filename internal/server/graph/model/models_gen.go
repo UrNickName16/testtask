@@ -2,16 +2,23 @@
 
 package model
 
+type InterfaceConfig struct {
+	HardwareAddr *string  `json:"hardwareAddr,omitempty"`
+	Mtu          *int     `json:"mtu,omitempty"`
+	Flags        []string `json:"flags,omitempty"`
+	Addrs        []string `json:"addrs,omitempty"`
+}
+
 type NetInterface struct {
-	Name            string  `json:"name"`
-	Config          *string `json:"config,omitempty"`
-	LinkUp          bool    `json:"linkUp"`
-	PacketsSent     int     `json:"packetsSent"`
-	PacketsReceived int     `json:"packetsReceived"`
-	BytesSent       int     `json:"bytesSent"`
-	BytesReceived   int     `json:"bytesReceived"`
-	SpeedSent       float64 `json:"speedSent"`
-	SpeedReceived   float64 `json:"speedReceived"`
+	Name            string           `json:"name"`
+	Config          *InterfaceConfig `json:"config,omitempty"`
+	LinkUp          bool             `json:"linkUp"`
+	PacketsSent     int              `json:"packetsSent"`
+	PacketsReceived int              `json:"packetsReceived"`
+	BytesSent       int              `json:"bytesSent"`
+	BytesReceived   int              `json:"bytesReceived"`
+	SpeedSent       float64          `json:"speedSent"`
+	SpeedReceived   float64          `json:"speedReceived"`
 }
 
 type Query struct {

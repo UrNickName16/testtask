@@ -1,6 +1,13 @@
+type InterfaceConfig {
+    hardwareAddr: String
+    mtu: Int
+    flags: [String!]
+    addrs: [String!]
+}
+
 type NetInterface {
     name: String!
-    config: String
+    config: InterfaceConfig
     linkUp: Boolean!
     packetsSent: Int!
     packetsReceived: Int!

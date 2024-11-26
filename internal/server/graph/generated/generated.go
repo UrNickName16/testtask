@@ -45,6 +45,13 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	InterfaceConfig struct {
+		Addrs        func(childComplexity int) int
+		Flags        func(childComplexity int) int
+		HardwareAddr func(childComplexity int) int
+		Mtu          func(childComplexity int) int
+	}
+
 	NetInterface struct {
 		BytesReceived   func(childComplexity int) int
 		BytesSent       func(childComplexity int) int
@@ -84,6 +91,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "InterfaceConfig.addrs":
+		if e.complexity.InterfaceConfig.Addrs == nil {
+			break
+		}
+
+		return e.complexity.InterfaceConfig.Addrs(childComplexity), true
+
+	case "InterfaceConfig.flags":
+		if e.complexity.InterfaceConfig.Flags == nil {
+			break
+		}
+
+		return e.complexity.InterfaceConfig.Flags(childComplexity), true
+
+	case "InterfaceConfig.hardwareAddr":
+		if e.complexity.InterfaceConfig.HardwareAddr == nil {
+			break
+		}
+
+		return e.complexity.InterfaceConfig.HardwareAddr(childComplexity), true
+
+	case "InterfaceConfig.mtu":
+		if e.complexity.InterfaceConfig.Mtu == nil {
+			break
+		}
+
+		return e.complexity.InterfaceConfig.Mtu(childComplexity), true
 
 	case "NetInterface.bytesReceived":
 		if e.complexity.NetInterface.BytesReceived == nil {
@@ -244,9 +279,16 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphqls", Input: `type NetInterface {
+	{Name: "../schema.graphqls", Input: `type InterfaceConfig {
+    hardwareAddr: String
+    mtu: Int
+    flags: [String!]
+    addrs: [String!]
+}
+
+type NetInterface {
     name: String!
-    config: String
+    config: InterfaceConfig
     linkUp: Boolean!
     packetsSent: Int!
     packetsReceived: Int!
@@ -371,6 +413,170 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _InterfaceConfig_hardwareAddr(ctx context.Context, field graphql.CollectedField, obj *model.InterfaceConfig) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InterfaceConfig_hardwareAddr(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HardwareAddr, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InterfaceConfig_hardwareAddr(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InterfaceConfig",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InterfaceConfig_mtu(ctx context.Context, field graphql.CollectedField, obj *model.InterfaceConfig) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InterfaceConfig_mtu(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Mtu, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InterfaceConfig_mtu(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InterfaceConfig",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InterfaceConfig_flags(ctx context.Context, field graphql.CollectedField, obj *model.InterfaceConfig) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InterfaceConfig_flags(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Flags, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InterfaceConfig_flags(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InterfaceConfig",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InterfaceConfig_addrs(ctx context.Context, field graphql.CollectedField, obj *model.InterfaceConfig) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InterfaceConfig_addrs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Addrs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InterfaceConfig_addrs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InterfaceConfig",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _NetInterface_name(ctx context.Context, field graphql.CollectedField, obj *model.NetInterface) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_NetInterface_name(ctx, field)
 	if err != nil {
@@ -438,9 +644,9 @@ func (ec *executionContext) _NetInterface_config(ctx context.Context, field grap
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(*model.InterfaceConfig)
 	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+	return ec.marshalOInterfaceConfig2ᚖtesttaskᚋinternalᚋserverᚋgraphᚋmodelᚐInterfaceConfig(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_NetInterface_config(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -450,7 +656,17 @@ func (ec *executionContext) fieldContext_NetInterface_config(_ context.Context, 
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "hardwareAddr":
+				return ec.fieldContext_InterfaceConfig_hardwareAddr(ctx, field)
+			case "mtu":
+				return ec.fieldContext_InterfaceConfig_mtu(ctx, field)
+			case "flags":
+				return ec.fieldContext_InterfaceConfig_flags(ctx, field)
+			case "addrs":
+				return ec.fieldContext_InterfaceConfig_addrs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InterfaceConfig", field.Name)
 		},
 	}
 	return fc, nil
@@ -2738,6 +2954,48 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 
 // region    **************************** object.gotpl ****************************
 
+var interfaceConfigImplementors = []string{"InterfaceConfig"}
+
+func (ec *executionContext) _InterfaceConfig(ctx context.Context, sel ast.SelectionSet, obj *model.InterfaceConfig) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, interfaceConfigImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("InterfaceConfig")
+		case "hardwareAddr":
+			out.Values[i] = ec._InterfaceConfig_hardwareAddr(ctx, field, obj)
+		case "mtu":
+			out.Values[i] = ec._InterfaceConfig_mtu(ctx, field, obj)
+		case "flags":
+			out.Values[i] = ec._InterfaceConfig_flags(ctx, field, obj)
+		case "addrs":
+			out.Values[i] = ec._InterfaceConfig_addrs(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var netInterfaceImplementors = []string{"NetInterface"}
 
 func (ec *executionContext) _NetInterface(ctx context.Context, sel ast.SelectionSet, obj *model.NetInterface) graphql.Marshaler {
@@ -3603,6 +3861,67 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalInt(*v)
+	return res
+}
+
+func (ec *executionContext) marshalOInterfaceConfig2ᚖtesttaskᚋinternalᚋserverᚋgraphᚋmodelᚐInterfaceConfig(ctx context.Context, sel ast.SelectionSet, v *model.InterfaceConfig) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._InterfaceConfig(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
