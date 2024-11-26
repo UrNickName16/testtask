@@ -2,15 +2,23 @@ package stats
 
 import (
 	"log"
+	"net"
 	"sync"
 	"time"
 
-	"github.com/shirou/gopsutil/net"
+	netstat "github.com/shirou/gopsutil/net"
 )
+
+type InterfaceConfig struct {
+	HardwareAddr string
+	MTU          int
+	Flags        []string
+	Addrs        []string
+}
 
 type InterfaceStats struct {
 	Name            string
-	Config          string
+	Config          InterfaceConfig
 	LinkUp          bool
 	PacketsSent     uint64
 	PacketsReceived uint64
@@ -31,6 +39,7 @@ func NewStatsService() *Service {
 		interfaces: make(map[string]*InterfaceStats),
 		prevStats:  make(map[string]*InterfaceStats),
 	}
+	s.updateStats()
 	go s.start()
 	return s
 }
@@ -39,9 +48,61 @@ func (s *Service) start() {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 	for {
-		s.updateStats()
 		<-ticker.C
+		s.updateStats()
 	}
+}
+
+func getInterfaceConfig(ifaceName string) InterfaceConfig {
+	iface, err := net.InterfaceByName(ifaceName)
+	if err != nil {
+		log.Printf("Error getting interface %s: %v", ifaceName, err)
+		return InterfaceConfig{}
+	}
+
+	addrs, err := iface.Addrs()
+	if err != nil {
+		log.Printf("Error getting addresses for interface %s: %v", ifaceName, err)
+		return InterfaceConfig{}
+	}
+
+	var addrStrings []string
+	for _, addr := range addrs {
+		addrStrings = append(addrStrings, addr.String())
+	}
+
+	var flags []string
+	if iface.Flags&net.FlagUp != 0 {
+		flags = append(flags, "up")
+	}
+	if iface.Flags&net.FlagBroadcast != 0 {
+		flags = append(flags, "broadcast")
+	}
+	if iface.Flags&net.FlagLoopback != 0 {
+		flags = append(flags, "loopback")
+	}
+	if iface.Flags&net.FlagPointToPoint != 0 {
+		flags = append(flags, "pointtopoint")
+	}
+	if iface.Flags&net.FlagMulticast != 0 {
+		flags = append(flags, "multicast")
+	}
+
+	return InterfaceConfig{
+		HardwareAddr: iface.HardwareAddr.String(),
+		MTU:          iface.MTU,
+		Flags:        flags,
+		Addrs:        addrStrings,
+	}
+}
+
+func isInterfaceUp(name string) bool {
+	iface, err := net.InterfaceByName(name)
+	if err != nil {
+		log.Printf("Error getting interface %s: %v", name, err)
+		return false
+	}
+	return iface.Flags&net.FlagUp != 0
 }
 
 func (s *Service) updateStats() {
@@ -50,7 +111,7 @@ func (s *Service) updateStats() {
 
 	currentStats := make(map[string]*InterfaceStats)
 
-	netIOCounters, err := net.IOCounters(true)
+	netIOCounters, err := netstat.IOCounters(true)
 	if err != nil {
 		log.Printf("Error getting net IO counters: %v", err)
 		return
@@ -59,19 +120,22 @@ func (s *Service) updateStats() {
 	for _, counter := range netIOCounters {
 		ifaceName := counter.Name
 
+		ifaceConfig := getInterfaceConfig(ifaceName)
+
 		ifaceStat := &InterfaceStats{
 			Name:            ifaceName,
+			Config:          ifaceConfig,
 			BytesReceived:   counter.BytesRecv,
 			PacketsReceived: counter.PacketsRecv,
 			BytesSent:       counter.BytesSent,
 			PacketsSent:     counter.PacketsSent,
-			LinkUp:          true,
+			LinkUp:          isInterfaceUp(ifaceName),
 		}
 
 		if prev, ok := s.prevStats[ifaceName]; ok {
-			duration := 5.0
-			ifaceStat.SpeedReceived = float64(counter.BytesRecv-prev.BytesReceived) / duration
-			ifaceStat.SpeedSent = float64(counter.BytesSent-prev.BytesSent) / duration
+			duration := 5.0 // Период обновления в секундах
+			ifaceStat.SpeedReceived = float64(ifaceStat.BytesReceived-prev.BytesReceived) / duration
+			ifaceStat.SpeedSent = float64(ifaceStat.BytesSent-prev.BytesSent) / duration
 		}
 
 		currentStats[ifaceName] = ifaceStat
@@ -79,6 +143,11 @@ func (s *Service) updateStats() {
 
 	s.prevStats = s.interfaces
 	s.interfaces = currentStats
+
+	// Логирование
+	for name, iface := range s.interfaces {
+		log.Printf("Interface %s: %+v", name, iface)
+	}
 }
 
 func (s *Service) GetInterfaces() []*InterfaceStats {
