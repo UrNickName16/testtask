@@ -1,0 +1,15 @@
+type NetInterface {
+    name: String!
+    config: String
+    linkUp: Boolean!
+    packetsSent: Int!
+    packetsReceived: Int!
+    bytesSent: Int!
+    bytesReceived: Int!
+    speedSent: Float!
+    speedReceived: Float!
+}
+
+type Query {
+    networkInterfaces: [NetInterface!]!
+}
